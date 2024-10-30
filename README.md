@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-# lucia-passport
-=======
 <p align="center">
   <a href="https://layerzero.network">
     <img alt="LayerZero" style="width: 400px" src="https://docs.layerzero.network/img/LayerZero_Logo_White.svg"/>
@@ -109,4 +106,3 @@ By following these steps, you can focus more on creating innovative omnichain so
 <p align="center">
   Join our community on <a href="https://discord-layerzero.netlify.app/discord" style="color: #a77dff">Discord</a> | Follow us on <a href="https://twitter.com/LayerZero_Labs" style="color: #a77dff">Twitter</a>
 </p>
->>>>>>> d073069 (wip)
