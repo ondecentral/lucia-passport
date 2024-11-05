@@ -1,15 +1,41 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract PassportNFT is ERC721URIStorage, Ownable {
+contract PassportNFT is ERC721, ERC721Enumerable, Ownable {
+    mapping(uint256 => string) private _tokenURIs;
     uint256 private _tokenIdCounter;
-    mapping(uint256 => bool) private _mintedTokens; // To track minted tokens
 
-    constructor() ERC721("PassportNFT", "PPTNFT") Ownable(msg.sender){
+    constructor() ERC721("PassportNFT", "PPTNFT") Ownable(msg.sender) {
         _tokenIdCounter = 1;
+    }
+
+    // Required overrides for ERC721Enumerable
+    function _update(address to, uint256 tokenId, address auth)
+        internal
+        override(ERC721, ERC721Enumerable)
+        returns (address)
+    {
+        return super._update(to, tokenId, auth);
+    }
+
+    function _increaseBalance(address account, uint128 value)
+        internal
+        override(ERC721, ERC721Enumerable)
+    {
+        super._increaseBalance(account, value);
+    }
+
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        override(ERC721, ERC721Enumerable)
+        returns (bool)
+    {
+        return super.supportsInterface(interfaceId);
     }
 
     // Function to mint a new Passport NFT
@@ -17,25 +43,25 @@ contract PassportNFT is ERC721URIStorage, Ownable {
         uint256 tokenId = _tokenIdCounter;
         _tokenIdCounter += 1;
         _safeMint(to, tokenId);
-        _setTokenURI(tokenId, uri);
-        _mintedTokens[tokenId] = true; // Mark the tokenId as minted
+        _tokenURIs[tokenId] = uri;
     }
 
-    // Custom exists function to replace _exists
-    function _tokenExists(uint256 tokenId) internal view returns (bool) {
-        return _mintedTokens[tokenId];
+    // Function to get tokenURI
+    function tokenURI(uint256 tokenId) public view override returns (string memory) {
+        require(_ownerOf(tokenId) != address(0), "URI query for nonexistent token");
+        return _tokenURIs[tokenId];
     }
 
     // Function to update metadata (tokenURI) of a Passport NFT
     function updateTokenURI(uint256 tokenId, string memory newUri) public onlyOwner {
-        require(_tokenExists(tokenId), "Token ID does not exist");
-        _setTokenURI(tokenId, newUri);
+        require(_ownerOf(tokenId) != address(0), "Token ID does not exist");
+        _tokenURIs[tokenId] = newUri;
     }
 
     // Function to burn a Passport NFT
     function burnPassport(uint256 tokenId) public onlyOwner {
-        require(_tokenExists(tokenId), "Token ID does not exist");
+        require(_ownerOf(tokenId) != address(0), "Token ID does not exist");
         _burn(tokenId);
-        delete _mintedTokens[tokenId]; // Clear the tokenId from the minted list
+        delete _tokenURIs[tokenId];
     }
 }

@@ -36,7 +36,7 @@ contract RewardSystem is Ownable, OApp {
     }
 
     // Function for users to perform an action and earn points
-    function performAction(ActionType _actionType) external {
+    function performAction(ActionType _actionType) external payable {
         require(passportNFT.balanceOf(msg.sender) > 0, "Not a passport holder");
         uint256 passportId = passportNFT.tokenOfOwnerByIndex(msg.sender, 0); // Get user's passport token ID
         uint256 points = actionPoints[_actionType];
@@ -47,19 +47,40 @@ contract RewardSystem is Ownable, OApp {
         syncPointsAcrossChains(passportId, passportPoints[passportId]); // Sync points across authorized chains
     }
 
-    // Internal function to sync points across chains
+    // Replace estimateTotalFees with quoteFee from OApp
+    function quoteFee(uint16 _dstEid, uint256 _passportId, uint256 _points) public view returns (MessagingFee memory fee) {
+        bytes memory payload = abi.encode(_passportId, _points);
+        return _quote(_dstEid, payload, "", false);
+    }
+
+    // Modify syncPointsAcrossChains to use proper fee handling
     function syncPointsAcrossChains(uint256 _passportId, uint256 _points) internal {
-        // Encoding the message payload for cross-chain communication
         bytes memory payload = abi.encode(_passportId, _points);
         
-        // Loop through authorized chain IDs and send messages
+        uint256 totalFee = 0;
+        // First calculate total fees needed
         for (uint i = 0; i < authorizedChainIds.length; i++) {
-            uint16 chainId = authorizedChainIds[i];
-            MessagingFee memory fee = MessagingFee(msg.value, 0); // Set appropriate fees
-            _lzSend(chainId, payload, "", fee, payable(msg.sender)); // Sending cross-chain message
+            MessagingFee memory fee = _quote(authorizedChainIds[i], payload, "", false);
+            totalFee += fee.nativeFee;
+        }
+        
+        require(msg.value >= totalFee, "Insufficient value for cross-chain messages");
+
+        // Send messages to all chains
+        for (uint i = 0; i < authorizedChainIds.length; i++) {
+            uint16 dstEid = authorizedChainIds[i];
+            MessagingFee memory fee = _quote(dstEid, payload, "", false);
+            _lzSend(dstEid, payload, "", fee, payable(msg.sender));
         }
 
-        emit SyncPoints(_passportId, _points); // Emit event after syncing
+        // Refund excess fees
+        uint256 excess = msg.value - totalFee;
+        if (excess > 0) {
+            (bool success, ) = msg.sender.call{value: excess}("");
+            require(success, "Failed to refund excess value");
+        }
+
+        emit SyncPoints(_passportId, _points);
     }
 
     // Internal function to handle incoming messages from another chain
@@ -76,6 +97,7 @@ contract RewardSystem is Ownable, OApp {
 
     // Function to check total points for a specific passport ID
     function checkTotalPoints(uint256 _passportId) external view returns (uint256) {
+        require(passportNFT.ownerOf(_passportId) == msg.sender, "Not a passport holder");
         return passportPoints[_passportId] + localPoints[msg.sender];
     }
 

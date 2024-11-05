@@ -1,8 +1,9 @@
 {
-  "name": "@layerzerolabs/oapp-example",
+  "name": "lucia-passport",
   "version": "0.3.1",
   "private": true,
   "license": "MIT",
+  "type": "commonjs",
   "scripts": {
     "clean": "rm -rf artifacts cache out",
     "compile": "$npm_execpath run compile:forge && $npm_execpath run compile:hardhat",
@@ -16,8 +17,9 @@
     "test:forge": "forge test",
     "test:hardhat": "hardhat test"
   },
-  "resolutions": {
-    "ethers": "^5.7.0"
+  "dependencies": {
+    "@layerzerolabs/test-devtools-evm-hardhat": "^0.3.0",
+    "forge-std": "^1.1.2"
   },
   "devDependencies": {
     "@babel/core": "^7.23.9",
@@ -33,16 +35,19 @@
     "@layerzerolabs/test-devtools-evm-foundry": "~2.0.0",
     "@layerzerolabs/toolbox-foundry": "~0.1.9",
     "@layerzerolabs/toolbox-hardhat": "~0.4.0",
-    "@nomicfoundation/hardhat-ethers": "^3.0.5",
-    "@nomiclabs/hardhat-ethers": "^2.0.1",
+    "@nomicfoundation/hardhat-chai-matchers": "^1.0.0",
+    "@nomicfoundation/hardhat-ethers": "^3.0.0",
+    "@nomicfoundation/hardhat-network-helpers": "^1.0.0",
+    "@nomicfoundation/hardhat-toolbox": "^2.0.0",
+    "@nomiclabs/hardhat-ethers": "^2.0.0",
     "@openzeppelin/contracts": "^5.1.0",
     "@openzeppelin/contracts-upgradeable": "^5.0.2",
     "@rushstack/eslint-patch": "^1.7.0",
     "@types/chai": "^4.3.20",
     "@types/chai-as-promised": "^8.0.1",
-    "@types/mocha": "^10.0.6",
+    "@types/mocha": "^10.0.9",
     "@types/node": "~18.18.14",
-    "chai": "^4.5.0",
+    "chai": "^4.3.7",
     "chai-as-promised": "^8.0.0",
     "dotenv": "^16.4.1",
     "eslint": "^8.55.0",
@@ -56,20 +61,13 @@
     "solhint": "^4.1.1",
     "solidity-bytes-utils": "^0.8.2",
     "ts-node": "^10.9.2",
-    "typescript": "^5.4.4"
+    "typescript": "^5.6.3",
+    "zksync-ethers": "^5.0.1"
   },
   "engines": {
     "node": ">=18.16.0"
   },
-  "pnpm": {
-    "overrides": {
-      "ethers": "^5.7.2"
-    }
-  },
   "overrides": {
     "ethers": "^5.7.2"
-  },
-  "dependencies": {
-    "forge-std": "^1.1.2"
   }
 }
