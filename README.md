@@ -1,4 +1,3 @@
-# lucia-passport
 # Lucia Passport
 
 ## Overview
