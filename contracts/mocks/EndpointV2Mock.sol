@@ -8,6 +8,7 @@ contract EndpointV2Mock {
     uint256 public defaultFee;
 
     error NotPassportHolder();
+    error InsufficientFee();
 
     constructor(uint16 _eid) {
         eid = _eid;
@@ -23,7 +24,6 @@ contract EndpointV2Mock {
 
     function setDefaultFee(uint256 _fee) external {
         defaultFee = _fee;
-
     }
 
     // Mock function to simulate receiving messages
@@ -37,12 +37,37 @@ contract EndpointV2Mock {
         // You can add any necessary logic here
     }
 
-    // Mock function to quote fees
-    function quoteFee(
+    // Add this function to handle send() calls from OAppSender
+    function send(
         uint16 _dstEid,
-        uint256 _passportId,
-        uint256 _points
-    ) external view returns (uint256 nativeFee, bytes memory calldataBid) {
-        return (defaultFee, "");  // Return the default fee and empty calldata
+        bytes calldata _destination,
+        bytes calldata _payload,
+        address payable _refundAddress,
+        address _zroPaymentAddress,
+        bytes calldata _adapterParams
+    ) external payable {
+        if (msg.value < defaultFee) {
+            revert InsufficientFee();
+        }
+        // Mock implementation - you can add logic here if needed
+    }
+
+    // Add this function to handle quote() calls
+    function quote(
+        uint16 _dstEid,
+        MessagingParams memory _params,
+        bytes memory _options
+    ) external view returns (MessagingFee memory) {
+        return MessagingFee(defaultFee, 0);
+    }
+
+    struct MessagingParams {
+        address dstAddress;
+        bytes payload;
+    }
+
+    struct MessagingFee {
+        uint256 nativeFee;
+        uint256 lzTokenFee;
     }
 } 

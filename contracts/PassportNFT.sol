@@ -8,6 +8,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract PassportNFT is ERC721, ERC721Enumerable, Ownable {
     mapping(uint256 => string) private _tokenURIs;
     uint256 private _tokenIdCounter;
+    address public rewardSystem;
 
     constructor() ERC721("PassportNFT", "PPTNFT") Ownable(msg.sender) {
         _tokenIdCounter = 1;
@@ -63,5 +64,9 @@ contract PassportNFT is ERC721, ERC721Enumerable, Ownable {
         require(_ownerOf(tokenId) != address(0), "Token ID does not exist");
         _burn(tokenId);
         delete _tokenURIs[tokenId];
+    }
+
+    function setRewardSystem(address _rewardSystem) external onlyOwner {
+        rewardSystem = _rewardSystem;
     }
 }
